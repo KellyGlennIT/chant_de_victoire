@@ -1,0 +1,37 @@
+name: chants_de_victoire
+description: Chants de Victoire - Offline Modern Hymnbook
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  shared_preferences: ^2.2.2
+  url_launcher: ^6.2.1
+  share_plus: ^7.2.1
+  font_awesome_flutter: ^11.0.0
+  pdf: ^3.10.7
+  path_provider: ^2.1.1
+  webview_flutter: ^4.10.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/icon.png"
+  adaptive_icon_background: "#B71C1C"
+  adaptive_icon_foreground: "assets/icon/icon.png"
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/data/chants_de_victoire_hymns.json
