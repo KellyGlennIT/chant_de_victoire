@@ -3212,7 +3212,7 @@ class _MoreScreenState extends State<MoreScreen> {
           onTap: () async {
             // Remember to replace this with your actual GitHub Pages URL!
             final uri = Uri.parse(
-                'https://github.com/KellyGlennIT/chant_de_victoire/blob/main/privacy.html');
+                'https://raw.githack.com/KellyGlennIT/chant_de_victoire/main/privacy.html');
             if (await canLaunchUrl(uri)) {
               await launchUrl(uri, mode: LaunchMode.externalApplication);
             }
