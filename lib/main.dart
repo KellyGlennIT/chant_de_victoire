@@ -3305,19 +3305,28 @@ class _HymnReaderScreenState extends State<HymnReaderScreen> {
     );
   }
 
-  Future<void> _exportPdf(BuildContext context) async {
+    Future<void> _exportPdf(BuildContext context) async {
+    // Show loading spinner so the user knows the PDF is being generated
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
     try {
       final file = await PdfGenerator.generateHymnPdf(widget.hymn);
-      if (context.mounted) {
-        await Share.shareXFiles([XFile(file.path)],
-            subject: '${widget.hymn.title} — PDF');
-      }
+      if (!context.mounted) return;
+      Navigator.of(context, rootNavigator: true).pop(); // close spinner
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        subject: '${widget.hymn.title} — PDF',
+      );
     } catch (error) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export PDF impossible : $error')),
-        );
-      }
+      if (!context.mounted) return;
+      Navigator.of(context, rootNavigator: true).pop(); // close spinner
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Export PDF impossible : $error')),
+      );
     }
   }
 }
