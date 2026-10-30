@@ -2925,7 +2925,7 @@ class _MoreScreenState extends State<MoreScreen> {
         const Divider(color: Colors.white24),
         ListTile(
           leading: const Icon(Icons.info_outline, color: Colors.white),
-          title: const Text("À propos"),
+          title: const Text("Développeur"),
           onTap: () {
             Navigator.push(
               context,
@@ -3007,6 +3007,20 @@ class _MoreScreenState extends State<MoreScreen> {
           trailing: const Icon(Icons.call, color: AppTheme.primaryGreen),
           onTap: () async {
             final uri = Uri.parse('tel:+237677172614');
+            if (await canLaunchUrl(uri)) {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            }
+          },
+        ),
+        ListTile(
+          leading: const Icon(Icons.privacy_tip, color: Colors.greenAccent),
+          title: const Text("Politique de confidentialité"),
+          subtitle: const Text("Vos données sont en sécurité",
+              style: TextStyle(color: Colors.white54, fontSize: 12)),
+          onTap: () async {
+            // Remember to replace this with your actual GitHub Pages URL!
+            final uri = Uri.parse(
+                'https://KellyGlennIT.github.io/chant_de_victoire/privacy.html');
             if (await canLaunchUrl(uri)) {
               await launchUrl(uri, mode: LaunchMode.externalApplication);
             }
