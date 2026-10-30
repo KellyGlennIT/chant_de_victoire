@@ -103,8 +103,8 @@ int _scoreMatch(_HymnSearchIndex idx, String q) {
   return 0;
 }
 
-// ======================== INFO CARD (expandable) ========================
-class InfoAuteurChant extends StatefulWidget {
+/// ======================== INFO CARD (Bottom Sheet Content) ========================
+class InfoAuteurChant extends StatelessWidget {
   final String titreChant;
   final String auteur;
   final String annee;
@@ -131,16 +131,6 @@ class InfoAuteurChant extends StatefulWidget {
   });
 
   @override
-  State<InfoAuteurChant> createState() => _InfoAuteurChantState();
-}
-
-class _InfoAuteurChantState extends State<InfoAuteurChant> {
-  static const int _notePreviewChars = 200;
-  static const int _historyPreviewChars = 400;
-  bool _noteExpanded = false;
-  bool _historyExpanded = false;
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
@@ -148,18 +138,18 @@ class _InfoAuteurChantState extends State<InfoAuteurChant> {
     Widget detail(String label, String? value, IconData icon) {
       if (value == null || value.trim().isEmpty) return const SizedBox.shrink();
       return Padding(
-        padding: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.only(bottom: 12),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, size: 17, color: colors.primary),
-            const SizedBox(width: 8),
+            Icon(icon, size: 18, color: colors.primary),
+            const SizedBox(width: 12),
             Expanded(
               child: RichText(
                 text: TextSpan(
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: colors.onSurface,
-                    height: 1.35,
+                    height: 1.4,
                   ),
                   children: [
                     TextSpan(
@@ -176,169 +166,260 @@ class _InfoAuteurChantState extends State<InfoAuteurChant> {
       );
     }
 
-    Widget expandableText({
-      required String text,
-      required bool expanded,
-      required VoidCallback onToggle,
-      required int previewChars,
-      required TextStyle? style,
-      required bool selectable,
-    }) {
-      final needsToggle = text.length > previewChars;
-      final display = (!expanded && needsToggle)
-          ? '${text.substring(0, previewChars).trimRight()}…'
-          : text;
-
-      final displayWidget = selectable
-          ? SelectionArea(child: Text(display, style: style))
-          : Text(display, style: style);
-
-      if (!needsToggle) return displayWidget;
-
-      return Column(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          displayWidget,
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
-                minimumSize: const Size(0, 32),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              onPressed: onToggle,
-              icon: Icon(
-                expanded ? Icons.expand_less : Icons.expand_more,
-                size: 16,
-                color: colors.primary,
-              ),
-              label: Text(
-                expanded ? 'Lire moins' : 'Lire plus',
-                style: TextStyle(
-                  color: colors.primary,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12,
-                ),
+          Center(
+            child: Container(
+              width: 40,
+              height: 5,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
           ),
-        ],
-      );
-    }
-
-    final note = (widget.metadataReviewNote ?? '').trim();
-    final history = widget.histoire.trim();
-    final hasNote = note.isNotEmpty;
-    final hasHistory = history.isNotEmpty;
-
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      child: ExpansionTile(
-        leading: Icon(Icons.history_edu_rounded, color: colors.primary),
-        title: Text(
-          'À propos de : ${widget.titreChant}',
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.titleMedium
-              ?.copyWith(fontWeight: FontWeight.w700),
-        ),
-        collapsedIconColor: colors.primary,
-        iconColor: colors.primary,
-        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        children: [
+          const SizedBox(height: 16),
+          Text(
+            'À propos de : $titreChant',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: AppTheme.gold,
+            ),
+          ),
+          const SizedBox(height: 16),
           Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: colors.primaryContainer.withValues(alpha: 0.22),
-              borderRadius: BorderRadius.circular(14),
+              color: colors.primaryContainer.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                detail('Auteur / texte', widget.auteur,
-                    Icons.person_outline_rounded),
-                detail('Année', widget.annee, Icons.event_outlined),
-                detail('Compositeur', widget.compositeur,
-                    Icons.music_note_rounded),
-                detail('Traducteur / adaptateur', widget.traducteur,
-                    Icons.translate_rounded),
-                detail('Recueil / source', widget.source,
-                    Icons.menu_book_rounded),
-                detail('Référence biblique', widget.referenceBiblique,
-                    Icons.auto_stories_rounded),
-                detail('Thèmes', widget.themes, Icons.sell_outlined),
+                detail('Auteur', auteur, Icons.person_outline_rounded),
+                detail('Année', annee, Icons.event_outlined),
+                detail('Compositeur', compositeur, Icons.music_note_rounded),
+                detail('Traducteur', traducteur, Icons.translate_rounded),
+                detail('Source', source, Icons.menu_book_rounded),
+                detail('Référence', referenceBiblique, Icons.auto_stories_rounded),
+                detail('Thèmes', themes, Icons.sell_outlined),
               ],
             ),
           ),
-          if (hasNote) ...[
-            const SizedBox(height: 10),
+          if ((metadataReviewNote ?? '').trim().isNotEmpty) ...[
+            const SizedBox(height: 16),
             Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: colors.tertiaryContainer.withValues(alpha: 0.35),
-                borderRadius: BorderRadius.circular(12),
-                border:
-                    Border.all(color: colors.tertiary.withValues(alpha: 0.45)),
+                color: colors.tertiaryContainer.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: colors.tertiary.withValues(alpha: 0.4)),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Note de vérification',
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: colors.tertiary,
-                      letterSpacing: 0.4,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  expandableText(
-                    text: note,
-                    expanded: _noteExpanded,
-                    onToggle: () =>
-                        setState(() => _noteExpanded = !_noteExpanded),
-                    previewChars: _notePreviewChars,
-                    style: theme.textTheme.bodySmall?.copyWith(height: 1.35),
-                    selectable: false,
-                  ),
-                ],
+              child: Text(
+                'Note : ${metadataReviewNote!.trim()}',
+                style: theme.textTheme.bodySmall?.copyWith(height: 1.5),
               ),
             ),
           ],
-          if (hasHistory) ...[
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Histoire du cantique',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: colors.primary,
-                ),
+          if (histoire.trim().isNotEmpty) ...[
+            const SizedBox(height: 20),
+            Text(
+              'Histoire du cantique',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: colors.primary,
               ),
             ),
-            const SizedBox(height: 6),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: expandableText(
-                text: history,
-                expanded: _historyExpanded,
-                onToggle: () =>
-                    setState(() => _historyExpanded = !_historyExpanded),
-                previewChars: _historyPreviewChars,
-                style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
-                selectable: true,
-              ),
+            const SizedBox(height: 8),
+            SelectableText(
+              histoire,
+              style: theme.textTheme.bodyMedium?.copyWith(height: 1.6),
             ),
           ],
         ],
       ),
     );
+  }
+}
+
+// ======================== READER ========================
+class HymnReaderScreen extends StatefulWidget {
+  final Hymn hymn;
+  final bool isFavorite;
+  final VoidCallback onToggleFavorite;
+  final double fontSize;
+  final double scrollSpeed;
+
+  const HymnReaderScreen({
+    super.key,
+    required this.hymn,
+    required this.isFavorite,
+    required this.onToggleFavorite,
+    required this.fontSize,
+    required this.scrollSpeed,
+  });
+
+  @override
+  State<HymnReaderScreen> createState() => _HymnReaderScreenState();
+}
+
+class _HymnReaderScreenState extends State<HymnReaderScreen> {
+  late bool _isFav;
+
+  @override
+  void initState() {
+    super.initState();
+    _isFav = widget.isFavorite;
+  }
+
+  void _toggleFavorite() {
+    setState(() => _isFav = !_isFav);
+    widget.onToggleFavorite();
+  }
+
+  void _showInfoSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.65, // Starts at 65% of screen height
+        minChildSize: 0.3,
+        maxChildSize: 0.95, // Never covers the whole screen (leaves 5%)
+        expand: false,
+        builder: (_, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: AppTheme.cardBackground,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: InfoAuteurChant(
+              titreChant: widget.hymn.title,
+              auteur: widget.hymn.auteur ?? 'Inconnu',
+              annee: widget.hymn.annee ?? '',
+              histoire: widget.hymn.histoire ?? '',
+              compositeur: widget.hymn.compositeur,
+              traducteur: widget.hymn.traducteur,
+              source: widget.hymn.source,
+              referenceBiblique: widget.hymn.referenceBiblique,
+              themes: widget.hymn.themes,
+              metadataReviewNote: widget.hymn.metadataReviewNote,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("${widget.hymn.number}. ${widget.hymn.title}"),
+        actions: [
+          if (!widget.hymn.isCustom)
+            IconButton(
+              icon: Icon(
+                _isFav ? Icons.star : Icons.star_border,
+                color: Colors.amber,
+              ),
+              onPressed: _toggleFavorite,
+            ),
+          // NEW: Info Button to trigger the Bottom Sheet
+          IconButton(
+            icon: const Icon(Icons.info_outline, color: Colors.white),
+            tooltip: 'À propos',
+            onPressed: () => _showInfoSheet(context),
+          ),
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'share_txt') {
+                Share.share(_hymnShareText(widget.hymn),
+                    subject: "Chants de Victoire - ${widget.hymn.title}");
+              } else if (value == 'share_pdf') {
+                _exportPdf(context);
+              }
+            },
+            itemBuilder: (_) => [
+              const PopupMenuItem(
+                  value: 'share_txt',
+                  child: ListTile(
+                    leading:
+                        Icon(Icons.text_snippet, color: AppTheme.primaryGreen),
+                    title: Text("Exporter en TXT"),
+                    contentPadding: EdgeInsets.zero,
+                  )),
+              const PopupMenuItem(
+                  value: 'share_pdf',
+                  child: ListTile(
+                    leading: Icon(Icons.picture_as_pdf, color: Colors.red),
+                    title: Text("Exporter en PDF"),
+                    contentPadding: EdgeInsets.zero,
+                  )),
+            ],
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              RepaintBoundary(
+                child: SelectionArea(
+                  child: Text(
+                    widget.hymn.lyrics,
+                    style: TextStyle(fontSize: widget.fontSize, height: 1.6),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 60), // Padding at bottom so FAB doesn't cover text
+            ],
+          ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppTheme.primaryGreen,
+        child: const Icon(Icons.fullscreen),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => WorshipModeScreen(
+                hymn: widget.hymn,
+                scrollSpeed: widget.scrollSpeed,
+                fontSize: widget.fontSize.clamp(24.0, 40.0),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _exportPdf(BuildContext context) async {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+    try {
+      final file = await PdfGenerator.generateHymnPdf(widget.hymn);
+      if (!context.mounted) return;
+      Navigator.of(context, rootNavigator: true).pop();
+      await Share.shareXFiles([XFile(file.path)],
+          subject: '${widget.hymn.title} — PDF');
+    } catch (error) {
+      if (!context.mounted) return;
+      Navigator.of(context, rootNavigator: true).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Export PDF impossible : $error')),
+      );
+    }
   }
 }
 
@@ -404,10 +485,8 @@ class AppTheme {
   }
 }
 
-// ======================== PDF GENERATION ========================
 // ======================== BEAUTIFUL ADAPTIVE PDF GENERATION ========================
 class PdfGenerator {
-  // Brand colors
   static const PdfColor _brandGreen = PdfColor.fromInt(0xFF1B5E20);
   static const PdfColor _brandGold = PdfColor.fromInt(0xFFFFC107);
   static const PdfColor _lightGrey = PdfColor.fromInt(0xFFF0F0F0);
@@ -445,9 +524,7 @@ class PdfGenerator {
     required bool startEachHymnOnNewPage,
     required bool includeTitlePage,
   }) async {
-    if (hymns.isEmpty) {
-      throw ArgumentError('Aucun cantique à exporter en PDF.');
-    }
+    if (hymns.isEmpty) throw ArgumentError('Aucun cantique à exporter.');
 
     final pdf = pw.Document(
       compress: true,
@@ -462,63 +539,17 @@ class PdfGenerator {
     final sans = pw.Font.helvetica();
     final sansBold = pw.Font.helveticaBold();
 
-    final coverTitleStyle = pw.TextStyle(
-      font: sansBold,
-      fontSize: 36,
-      color: _brandGreen,
-      lineSpacing: 6,
-    );
-    final coverSubtitleStyle = pw.TextStyle(
-      font: serifItalic,
-      fontSize: 14,
-      color: _midGrey,
-    );
-    final hymnTitleStyle = pw.TextStyle(
-      font: sansBold,
-      fontSize: 22,
-      color: _darkText,
-      lineSpacing: 4,
-    );
-    final creditStyle = pw.TextStyle(
-      font: serifItalic,
-      fontSize: 10,
-      color: _midGrey,
-      lineSpacing: 3,
-    );
-    final numberStyle = pw.TextStyle(
-      font: sansBold,
-      fontSize: 12,
-      color: _brandGreen,
-    );
-    final bodyStyle = pw.TextStyle(
-      font: serif,
-      fontSize: 12,
-      color: _darkText,
-      lineSpacing: 4,
-    );
-    final sectionLabelStyle = pw.TextStyle(
-      font: sansBold,
-      fontSize: 11,
-      color: _brandGreen,
-      letterSpacing: 0.8,
-    );
-    final repeatStyle = pw.TextStyle(
-      font: serifItalic,
-      fontSize: 9.5,
-      color: _midGrey,
-    );
-    final pageNumberStyle = pw.TextStyle(
-      font: sans,
-      fontSize: 9,
-      color: _midGrey,
-    );
-    final headerStyle = pw.TextStyle(
-      font: serifItalic,
-      fontSize: 9,
-      color: _midGrey,
-    );
+    final coverTitleStyle = pw.TextStyle(font: sansBold, fontSize: 36, color: _brandGreen, lineSpacing: 6);
+    final coverSubtitleStyle = pw.TextStyle(font: serifItalic, fontSize: 14, color: _midGrey);
+    final hymnTitleStyle = pw.TextStyle(font: sansBold, fontSize: 22, color: _darkText, lineSpacing: 4);
+    final creditStyle = pw.TextStyle(font: serifItalic, fontSize: 10, color: _midGrey, lineSpacing: 3);
+    final numberStyle = pw.TextStyle(font: sansBold, fontSize: 12, color: _brandGreen);
+    final bodyStyle = pw.TextStyle(font: serif, fontSize: 12, color: _darkText, lineSpacing: 4);
+    final sectionLabelStyle = pw.TextStyle(font: sansBold, fontSize: 11, color: _brandGreen, letterSpacing: 0.8);
+    final repeatStyle = pw.TextStyle(font: serifItalic, fontSize: 9.5, color: _midGrey);
+    final pageNumberStyle = pw.TextStyle(font: sans, fontSize: 9, color: _midGrey);
+    final headerStyle = pw.TextStyle(font: serifItalic, fontSize: 9, color: _midGrey);
 
-    // ---- Title Page for multi-hymn exports ----
     if (includeTitlePage) {
       pdf.addPage(pw.Page(
         pageFormat: PdfPageFormat.a4,
@@ -536,62 +567,36 @@ class PdfGenerator {
                 ),
                 child: pw.Column(
                   children: [
-                    pw.Text('CHANTS DE VICTOIRE',
-                        style: pw.TextStyle(
-                          font: sansBold,
-                          fontSize: 14,
-                          color: _brandGreen,
-                          letterSpacing: 3,
-                        )),
+                    pw.Text('CHANTS DE VICTOIRE', style: pw.TextStyle(font: sansBold, fontSize: 14, color: _brandGreen, letterSpacing: 3)),
                     pw.SizedBox(height: 24),
-                    pw.Text(documentTitle,
-                        textAlign: pw.TextAlign.center,
-                        style: coverTitleStyle),
+                    pw.Text(documentTitle, textAlign: pw.TextAlign.center, style: coverTitleStyle),
                     pw.SizedBox(height: 12),
                     pw.Container(width: 80, height: 3, color: _brandGold),
                     pw.SizedBox(height: 12),
-                    pw.Text(
-                      '${hymns.length} cantique${hymns.length > 1 ? 's' : ''}',
-                      style: coverSubtitleStyle,
-                    ),
+                    pw.Text('${hymns.length} cantique${hymns.length > 1 ? 's' : ''}', style: coverSubtitleStyle),
                     pw.SizedBox(height: 6),
-                    pw.Text(
-                      'Exporté le ${_formatDate(DateTime.now())}',
-                      style: coverSubtitleStyle,
-                    ),
+                    pw.Text('Exporté le ${_formatDate(DateTime.now())}', style: coverSubtitleStyle),
                   ],
                 ),
               ),
               pw.Spacer(flex: 3),
-              pw.Text('Que tout ce qui respire loue l\'Éternel !',
-                  style: pw.TextStyle(
-                    font: serifItalic,
-                    fontSize: 12,
-                    color: _midGrey,
-                  )),
+              pw.Text('Que tout ce qui respire loue l\'Éternel !', style: pw.TextStyle(font: serifItalic, fontSize: 12, color: _midGrey)),
             ],
           ),
         ),
       ));
     }
 
-    // ---- Content Pages ----
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.fromLTRB(55, 65, 55, 55),
         maxPages: 2000,
         header: (context) {
-          if (includeTitlePage && context.pageNumber == 2) {
-            return pw.SizedBox();
-          }
+          if (includeTitlePage && context.pageNumber == 2) return pw.SizedBox();
           return pw.Container(
             padding: const pw.EdgeInsets.only(bottom: 8),
-            decoration: const pw.BoxDecoration(
-              border: pw.Border(
-                bottom: pw.BorderSide(color: _lightGrey, width: 1),
-              ),
-            ),
+            decoration: const pw.BoxDecoration(border: pw.Border(bottom: pw.BorderSide(color: _lightGrey, width: 1))),
             child: pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
@@ -610,16 +615,8 @@ class PdfGenerator {
               pw.Text('— ', style: pageNumberStyle),
               pw.Container(
                 padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: pw.BoxDecoration(
-                  color: _brandGreen,
-                  borderRadius: pw.BorderRadius.circular(10),
-                ),
-                child: pw.Text('${context.pageNumber}',
-                    style: pw.TextStyle(
-                      font: sansBold,
-                      fontSize: 9,
-                      color: PdfColors.white,
-                    )),
+                decoration: pw.BoxDecoration(color: _brandGreen, borderRadius: pw.BorderRadius.circular(10)),
+                child: pw.Text('${context.pageNumber}', style: pw.TextStyle(font: sansBold, fontSize: 9, color: PdfColors.white)),
               ),
               pw.Text(' —', style: pageNumberStyle),
             ],
@@ -642,70 +639,27 @@ class PdfGenerator {
             final stanzas = _parseStanzas(hymn.lyrics);
             final totalLines = stanzas.fold<int>(0, (sum, s) => sum + s.lines.length);
 
-            // ===== SMART LAYOUT FOR SINGLE HYMN =====
             if (hymns.length == 1) {
               if (totalLines <= 24) {
-                // SHORT: 1 column, vertically centered
                 widgets.add(pw.Container(
                   height: 640,
                   alignment: pw.Alignment.center,
-                  child: _buildHymnBlock(
-                    hymn,
-                    stanzas,
-                    hymnTitleStyle: hymnTitleStyle,
-                    creditStyle: creditStyle,
-                    numberStyle: numberStyle,
-                    bodyStyle: bodyStyle,
-                    sectionLabelStyle: sectionLabelStyle,
-                    repeatStyle: repeatStyle,
-                  ),
+                  child: _buildHymnBlock(hymn, stanzas, hymnTitleStyle: hymnTitleStyle, creditStyle: creditStyle, numberStyle: numberStyle, bodyStyle: bodyStyle, sectionLabelStyle: sectionLabelStyle, repeatStyle: repeatStyle),
                 ));
               } else if (totalLines <= 75) {
-                // MEDIUM: 2 columns, vertically centered
                 final (left, right) = _splitStanzas(stanzas, totalLines);
                 widgets.add(pw.Container(
                   height: 640,
                   alignment: pw.Alignment.center,
-                  child: _buildHymnBlockTwoCols(
-                    hymn,
-                    left,
-                    right,
-                    hymnTitleStyle: hymnTitleStyle,
-                    creditStyle: creditStyle,
-                    numberStyle: numberStyle,
-                    bodyStyle: bodyStyle,
-                    sectionLabelStyle: sectionLabelStyle,
-                    repeatStyle: repeatStyle,
-                  ),
+                  child: _buildHymnBlockTwoCols(hymn, left, right, hymnTitleStyle: hymnTitleStyle, creditStyle: creditStyle, numberStyle: numberStyle, bodyStyle: bodyStyle, sectionLabelStyle: sectionLabelStyle, repeatStyle: repeatStyle),
                 ));
               } else {
-                // LONG: Standard single-column flow (auto-paginates)
-                widgets.add(_buildHymnBlock(
-                  hymn,
-                  stanzas,
-                  hymnTitleStyle: hymnTitleStyle,
-                  creditStyle: creditStyle,
-                  numberStyle: numberStyle,
-                  bodyStyle: bodyStyle,
-                  sectionLabelStyle: sectionLabelStyle,
-                  repeatStyle: repeatStyle,
-                ));
+                widgets.add(_buildHymnBlock(hymn, stanzas, hymnTitleStyle: hymnTitleStyle, creditStyle: creditStyle, numberStyle: numberStyle, bodyStyle: bodyStyle, sectionLabelStyle: sectionLabelStyle, repeatStyle: repeatStyle));
               }
             } else {
-              // MULTI-HYMN EXPORTS: standard layout
-              widgets.add(_buildHymnBlock(
-                hymn,
-                stanzas,
-                hymnTitleStyle: hymnTitleStyle,
-                creditStyle: creditStyle,
-                numberStyle: numberStyle,
-                bodyStyle: bodyStyle,
-                sectionLabelStyle: sectionLabelStyle,
-                repeatStyle: repeatStyle,
-              ));
+              widgets.add(_buildHymnBlock(hymn, stanzas, hymnTitleStyle: hymnTitleStyle, creditStyle: creditStyle, numberStyle: numberStyle, bodyStyle: bodyStyle, sectionLabelStyle: sectionLabelStyle, repeatStyle: repeatStyle));
             }
           }
-
           return widgets;
         },
       ),
@@ -721,8 +675,7 @@ class PdfGenerator {
     return file;
   }
 
-  static (List<_StanzaData>, List<_StanzaData>) _splitStanzas(
-      List<_StanzaData> stanzas, int totalLines) {
+  static (List<_StanzaData>, List<_StanzaData>) _splitStanzas(List<_StanzaData> stanzas, int totalLines) {
     final left = <_StanzaData>[];
     final right = <_StanzaData>[];
     var leftLines = 0;
@@ -739,124 +692,51 @@ class PdfGenerator {
     return (left, right);
   }
 
-  static pw.Widget _buildHymnBlock(
-    Hymn hymn,
-    List<_StanzaData> stanzas, {
-    required pw.TextStyle hymnTitleStyle,
-    required pw.TextStyle creditStyle,
-    required pw.TextStyle numberStyle,
-    required pw.TextStyle bodyStyle,
-    required pw.TextStyle sectionLabelStyle,
-    required pw.TextStyle repeatStyle,
-  }) {
+  static pw.Widget _buildHymnBlock(Hymn hymn, List<_StanzaData> stanzas, {required pw.TextStyle hymnTitleStyle, required pw.TextStyle creditStyle, required pw.TextStyle numberStyle, required pw.TextStyle bodyStyle, required pw.TextStyle sectionLabelStyle, required pw.TextStyle repeatStyle}) {
     final children = <pw.Widget>[];
 
-    children.add(pw.Center(
-      child: pw.Text(
-        _pdfCompatibleText('${hymn.number}. ${hymn.title}'),
-        textAlign: pw.TextAlign.center,
-        style: hymnTitleStyle,
-      ),
-    ));
+    children.add(pw.Center(child: pw.Text(_pdfCompatibleText('${hymn.number}. ${hymn.title}'), textAlign: pw.TextAlign.center, style: hymnTitleStyle)));
     children.add(pw.SizedBox(height: 10));
-    children.add(pw.Center(
-      child: pw.Container(width: 60, height: 2, color: _brandGold),
-    ));
+    children.add(pw.Center(child: pw.Container(width: 60, height: 2, color: _brandGold)));
 
     final credits = <String>[];
-    if ((hymn.auteur ?? '').trim().isNotEmpty) {
-      credits.add(_clip(hymn.auteur, 60));
-    }
-    if ((hymn.compositeur ?? '').trim().isNotEmpty &&
-        (hymn.compositeur ?? '') != (hymn.auteur ?? '')) {
-      credits.add('Musique : ${_clip(hymn.compositeur, 50)}');
-    }
-    if ((hymn.annee ?? '').trim().isNotEmpty) {
-      credits.add(_clip(hymn.annee, 30));
-    }
+    if ((hymn.auteur ?? '').trim().isNotEmpty) credits.add(_clip(hymn.auteur, 60));
+    if ((hymn.compositeur ?? '').trim().isNotEmpty && (hymn.compositeur ?? '') != (hymn.auteur ?? '')) credits.add('Musique : ${_clip(hymn.compositeur, 50)}');
+    if ((hymn.annee ?? '').trim().isNotEmpty) credits.add(_clip(hymn.annee, 30));
     if (credits.isNotEmpty) {
       children.add(pw.SizedBox(height: 8));
-      children.add(pw.Center(
-        child: pw.Text(
-          _pdfCompatibleText(credits.join('  ·  ')),
-          textAlign: pw.TextAlign.center,
-          style: creditStyle,
-        ),
-      ));
+      children.add(pw.Center(child: pw.Text(_pdfCompatibleText(credits.join('  ·  ')), textAlign: pw.TextAlign.center, style: creditStyle)));
     }
 
     if ((hymn.referenceBiblique ?? '').trim().isNotEmpty) {
       children.add(pw.SizedBox(height: 6));
-      children.add(pw.Center(
-        child: pw.Text(
-          _pdfCompatibleText(hymn.referenceBiblique!.trim()),
-          textAlign: pw.TextAlign.center,
-          style: pw.TextStyle(
-            font: pw.Font.timesItalic(),
-            fontSize: 9.5,
-            color: _midGrey,
-          ),
-        ),
-      ));
+      children.add(pw.Center(child: pw.Text(_pdfCompatibleText(hymn.referenceBiblique!.trim()), textAlign: pw.TextAlign.center, style: pw.TextStyle(font: pw.Font.timesItalic(), fontSize: 9.5, color: _midGrey))));
     }
 
     children.add(pw.SizedBox(height: 24));
 
     if (stanzas.isEmpty) {
       children.add(pw.Text('Aucune parole disponible.', style: bodyStyle));
-      return pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-        children: children,
-      );
+      return pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.stretch, children: children);
     }
 
     for (var i = 0; i < stanzas.length; i++) {
-      children.add(_buildStanza(
-        stanzas[i],
-        numberStyle: numberStyle,
-        bodyStyle: bodyStyle,
-        sectionLabelStyle: sectionLabelStyle,
-        repeatStyle: repeatStyle,
-      ));
-      if (i < stanzas.length - 1) {
-        children.add(pw.SizedBox(height: 12));
-      }
+      children.add(_buildStanza(stanzas[i], numberStyle: numberStyle, bodyStyle: bodyStyle, sectionLabelStyle: sectionLabelStyle, repeatStyle: repeatStyle));
+      if (i < stanzas.length - 1) children.add(pw.SizedBox(height: 12));
     }
 
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-      children: children,
-    );
+    return pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.stretch, children: children);
   }
 
-  static pw.Widget _buildHymnBlockTwoCols(
-    Hymn hymn,
-    List<_StanzaData> left,
-    List<_StanzaData> right, {
-    required pw.TextStyle hymnTitleStyle,
-    required pw.TextStyle creditStyle,
-    required pw.TextStyle numberStyle,
-    required pw.TextStyle bodyStyle,
-    required pw.TextStyle sectionLabelStyle,
-    required pw.TextStyle repeatStyle,
-  }) {
+  static pw.Widget _buildHymnBlockTwoCols(Hymn hymn, List<_StanzaData> left, List<_StanzaData> right, {required pw.TextStyle hymnTitleStyle, required pw.TextStyle creditStyle, required pw.TextStyle numberStyle, required pw.TextStyle bodyStyle, required pw.TextStyle sectionLabelStyle, required pw.TextStyle repeatStyle}) {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
       children: [
-        pw.Center(
-          child: pw.Text(
-            _pdfCompatibleText('${hymn.number}. ${hymn.title}'),
-            textAlign: pw.TextAlign.center,
-            style: hymnTitleStyle,
-          ),
-        ),
+        pw.Center(child: pw.Text(_pdfCompatibleText('${hymn.number}. ${hymn.title}'), textAlign: pw.TextAlign.center, style: hymnTitleStyle)),
         pw.SizedBox(height: 10),
-        pw.Center(
-          child: pw.Container(width: 60, height: 2, color: _brandGold),
-        ),
+        pw.Center(child: pw.Container(width: 60, height: 2, color: _brandGold)),
         pw.SizedBox(height: 8),
-        if ((hymn.auteur ?? '').trim().isNotEmpty ||
-            (hymn.annee ?? '').trim().isNotEmpty)
+        if ((hymn.auteur ?? '').trim().isNotEmpty || (hymn.annee ?? '').trim().isNotEmpty)
           pw.Center(
             child: pw.Text(
               _pdfCompatibleText([
@@ -874,36 +754,14 @@ class PdfGenerator {
             pw.Expanded(
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: left
-                    .map((s) => pw.Padding(
-                          padding: const pw.EdgeInsets.only(bottom: 10),
-                          child: _buildStanza(
-                            s,
-                            numberStyle: numberStyle,
-                            bodyStyle: bodyStyle,
-                            sectionLabelStyle: sectionLabelStyle,
-                            repeatStyle: repeatStyle,
-                          ),
-                        ))
-                    .toList(),
+                children: left.map((s) => pw.Padding(padding: const pw.EdgeInsets.only(bottom: 10), child: _buildStanza(s, numberStyle: numberStyle, bodyStyle: bodyStyle, sectionLabelStyle: sectionLabelStyle, repeatStyle: repeatStyle))).toList(),
               ),
             ),
             pw.SizedBox(width: 40),
             pw.Expanded(
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: right
-                    .map((s) => pw.Padding(
-                          padding: const pw.EdgeInsets.only(bottom: 10),
-                          child: _buildStanza(
-                            s,
-                            numberStyle: numberStyle,
-                            bodyStyle: bodyStyle,
-                            sectionLabelStyle: sectionLabelStyle,
-                            repeatStyle: repeatStyle,
-                          ),
-                        ))
-                    .toList(),
+                children: right.map((s) => pw.Padding(padding: const pw.EdgeInsets.only(bottom: 10), child: _buildStanza(s, numberStyle: numberStyle, bodyStyle: bodyStyle, sectionLabelStyle: sectionLabelStyle, repeatStyle: repeatStyle))).toList(),
               ),
             ),
           ],
@@ -912,42 +770,20 @@ class PdfGenerator {
     );
   }
 
-  static pw.Widget _buildStanza(
-    _StanzaData stanza, {
-    required pw.TextStyle numberStyle,
-    required pw.TextStyle bodyStyle,
-    required pw.TextStyle sectionLabelStyle,
-    required pw.TextStyle repeatStyle,
-  }) {
+  static pw.Widget _buildStanza(_StanzaData stanza, {required pw.TextStyle numberStyle, required pw.TextStyle bodyStyle, required pw.TextStyle sectionLabelStyle, required pw.TextStyle repeatStyle}) {
     final children = <pw.Widget>[];
 
     if (stanza.sectionLabel != null) {
-      children.add(pw.Padding(
-        padding: const pw.EdgeInsets.only(bottom: 4),
-        child: pw.Text(
-          stanza.sectionLabel!.toUpperCase(),
-          style: sectionLabelStyle,
-        ),
-      ));
+      children.add(pw.Padding(padding: const pw.EdgeInsets.only(bottom: 4), child: pw.Text(stanza.sectionLabel!.toUpperCase(), style: sectionLabelStyle)));
     }
 
-    final textStyle = stanza.isRefrain
-        ? pw.TextStyle(
-            font: pw.Font.timesItalic(),
-            fontSize: 12,
-            color: _darkText,
-            lineSpacing: 4,
-          )
-        : bodyStyle;
+    final textStyle = stanza.isRefrain ? pw.TextStyle(font: pw.Font.timesItalic(), fontSize: 12, color: _darkText, lineSpacing: 4) : bodyStyle;
 
     if (stanza.number != null && stanza.lines.isNotEmpty) {
       children.add(pw.Row(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Container(
-            width: 22,
-            child: pw.Text('${stanza.number}.', style: numberStyle),
-          ),
+          pw.Container(width: 22, child: pw.Text('${stanza.number}.', style: numberStyle)),
           pw.Expanded(
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -955,10 +791,7 @@ class PdfGenerator {
                 for (var i = 0; i < stanza.lines.length; i++)
                   pw.Padding(
                     padding: pw.EdgeInsets.only(top: i == 0 ? 0 : 3),
-                    child: pw.Text(
-                      _pdfCompatibleText(stanza.lines[i]),
-                      style: textStyle,
-                    ),
+                    child: pw.Text(_pdfCompatibleText(stanza.lines[i]), style: textStyle),
                   ),
               ],
             ),
@@ -967,35 +800,16 @@ class PdfGenerator {
       ));
     } else {
       for (final line in stanza.lines) {
-        children.add(pw.Padding(
-          padding: const pw.EdgeInsets.only(bottom: 3),
-          child: pw.Text(
-            _pdfCompatibleText(line),
-            style: textStyle,
-          ),
-        ));
+        children.add(pw.Padding(padding: const pw.EdgeInsets.only(bottom: 3), child: pw.Text(_pdfCompatibleText(line), style: textStyle)));
       }
     }
 
     if (stanza.repeatCount > 0) {
-      final label = stanza.repeatCount == 2
-          ? '(bis)'
-          : stanza.repeatCount == 3
-              ? '(ter)'
-              : '(×${stanza.repeatCount})';
-      children.add(pw.Padding(
-        padding: pw.EdgeInsets.only(
-          top: 4,
-          left: stanza.number != null ? 22 : 0,
-        ),
-        child: pw.Text(label, style: repeatStyle),
-      ));
+      final label = stanza.repeatCount == 2 ? '(bis)' : (stanza.repeatCount == 3 ? '(ter)' : '(×${stanza.repeatCount})');
+      children.add(pw.Padding(padding: pw.EdgeInsets.only(top: 4, left: stanza.number != null ? 22 : 0), child: pw.Text(label, style: repeatStyle)));
     }
 
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: children,
-    );
+    return pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: children);
   }
 
   static List<_StanzaData> _parseStanzas(String lyrics) {
@@ -1010,16 +824,8 @@ class PdfGenerator {
     var isRefrain = false;
 
     void flush() {
-      if (currentSection == null && currentLines.isEmpty && currentRepeat == 0) {
-        return;
-      }
-      stanzas.add(_StanzaData(
-        number: currentNumber,
-        sectionLabel: currentSection,
-        lines: List<String>.from(currentLines),
-        repeatCount: currentRepeat,
-        isRefrain: isRefrain,
-      ));
+      if (currentSection == null && currentLines.isEmpty && currentRepeat == 0) return;
+      stanzas.add(_StanzaData(number: currentNumber, sectionLabel: currentSection, lines: List<String>.from(currentLines), repeatCount: currentRepeat, isRefrain: isRefrain));
       currentNumber = null;
       currentSection = null;
       currentLines = <String>[];
@@ -1029,18 +835,11 @@ class PdfGenerator {
 
     final numberRe = RegExp(r'^(\d+)\.\s+(.*)$');
     final repeatRe = RegExp(r'^\*+\s*\{\s*(\d+)\s*\}$');
-    final sectionRe = RegExp(
-      r'^(Refrain|Couplet|Pont|Chœur|Chorus)\s*:?\s*$',
-      caseSensitive: false,
-    );
+    final sectionRe = RegExp(r'^(Refrain|Couplet|Pont|Chœur|Chorus)\s*:?\s*$', caseSensitive: false);
 
     for (final rawLine in rawLines) {
       final trimmed = rawLine.trim();
-
-      if (trimmed.isEmpty) {
-        flush();
-        continue;
-      }
+      if (trimmed.isEmpty) { flush(); continue; }
 
       final repeatMatch = repeatRe.firstMatch(trimmed);
       if (repeatMatch != null) {
@@ -1053,25 +852,20 @@ class PdfGenerator {
         flush();
         currentNumber = numMatch.group(1)!;
         final content = (numMatch.group(2) ?? '').trim();
-        if (content.isNotEmpty) {
-          currentLines.add(_cleanInlineMarkers(content));
-        }
+        if (content.isNotEmpty) currentLines.add(_cleanInlineMarkers(content));
         continue;
       }
 
-     if (sectionRe.hasMatch(trimmed)) {
+      if (sectionRe.hasMatch(trimmed)) {
         flush();
         final section = trimmed.replaceAll(':', '').trim();
         currentSection = section;
         isRefrain = section.toLowerCase().startsWith('refrain');
         continue;
       }
-      final cleaned = _cleanInlineMarkers(
-        trimmed.replaceFirst(RegExp(r'^\*\s*'), ''),
-      );
-      if (cleaned.isNotEmpty) {
-        currentLines.add(cleaned);
-      }
+
+      final cleaned = _cleanInlineMarkers(trimmed.replaceFirst(RegExp(r'^\*\s*'), ''));
+      if (cleaned.isNotEmpty) currentLines.add(cleaned);
     }
     flush();
 
@@ -1090,10 +884,7 @@ class PdfGenerator {
   }
 
   static String _formatDate(DateTime date) {
-    const months = [
-      'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
-      'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'
-    ];
+    const months = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 
@@ -1107,25 +898,37 @@ class PdfGenerator {
 
   static String _pdfCompatibleText(String value) {
     final normalized = value
+        .replaceAll('\u0153', 'oe') // Fixes the Cœur (œ) box bug!
+        .replaceAll('\u0152', 'OE')
         .replaceAll('\u2011', '-')
         .replaceAll('\u202f', ' ')
         .replaceAll('\u00a0', ' ')
         .replaceAll('\u2212', '-')
+        .replaceAll('\u2018', "'")
+        .replaceAll('\u2019', "'")
+        .replaceAll('\u201A', "'")
+        .replaceAll('\u201B', "'")
+        .replaceAll('\u2032', "'")
+        .replaceAll('\u201C', '"')
+        .replaceAll('\u201D', '"')
+        .replaceAll('\u201E', '"')
+        .replaceAll('\u2033', '"')
         .replaceAll('\t', '    ');
+
     const winAnsiExtra = <int>{
       0x20AC, 0x201A, 0x0192, 0x201E, 0x2026, 0x2020, 0x2021, 0x02C6,
       0x2030, 0x0160, 0x2039, 0x0152, 0x017D, 0x2018, 0x2019, 0x201C,
       0x201D, 0x2022, 0x2013, 0x2014, 0x02DC, 0x2122, 0x0161, 0x203A,
       0x0153, 0x017E, 0x0178,
     };
+
     final buffer = StringBuffer();
     for (final rune in normalized.runes) {
       if (rune == 0x0A || rune == 0x0D) {
         buffer.writeCharCode(rune);
       } else if (rune >= 0x20 && rune <= 0x7E) {
         buffer.writeCharCode(rune);
-      } else if ((rune >= 0xA0 && rune <= 0xFF) ||
-          winAnsiExtra.contains(rune)) {
+      } else if ((rune >= 0xA0 && rune <= 0xFF) || winAnsiExtra.contains(rune)) {
         buffer.writeCharCode(rune);
       } else if (rune < 0x20) {
         // skip
@@ -1137,12 +940,7 @@ class PdfGenerator {
   }
 
   static String _safeFileName(String value) {
-    var name = value
-        .replaceAll(RegExp(r'[<>:"/\\|?*]'), '_')
-        .replaceAll(RegExp(r'\s+'), '_')
-        .replaceAll(RegExp(r'_+'), '_')
-        .replaceAll(RegExp(r'^\.+|\.+$'), '')
-        .trim();
+    var name = value.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_').replaceAll(RegExp(r'\s+'), '_').replaceAll(RegExp(r'_+'), '_').replaceAll(RegExp(r'^\.+|\.+$'), '').trim();
     if (name.isEmpty) name = 'Chant';
     if (name.length > 80) name = name.substring(0, 80);
     return name;
@@ -1156,14 +954,10 @@ class _StanzaData {
   final int repeatCount;
   final bool isRefrain;
 
-  _StanzaData({
-    this.number,
-    this.sectionLabel,
-    required this.lines,
-    this.repeatCount = 0,
-    this.isRefrain = false,
-  });
+  _StanzaData({this.number, this.sectionLabel, required this.lines, this.repeatCount = 0, this.isRefrain = false});
 }
+
+
 // ======================== MODEL ========================
 class Hymn {
   final String number;
@@ -3560,173 +3354,6 @@ String _hymnShareText(Hymn hymn) {
     parts.add('\nNote de vérification : ${hymn.metadataReviewNote}');
   }
   return parts.join('\n');
-}
-
-// ======================== READER ========================
-class HymnReaderScreen extends StatefulWidget {
-  final Hymn hymn;
-  final bool isFavorite;
-  final VoidCallback onToggleFavorite;
-  final double fontSize;
-  final double scrollSpeed;
-
-  const HymnReaderScreen({
-    super.key,
-    required this.hymn,
-    required this.isFavorite,
-    required this.onToggleFavorite,
-    required this.fontSize,
-    required this.scrollSpeed,
-  });
-
-  @override
-  State<HymnReaderScreen> createState() => _HymnReaderScreenState();
-}
-
-class _HymnReaderScreenState extends State<HymnReaderScreen> {
-  late bool _isFav;
-
-  @override
-  void initState() {
-    super.initState();
-    _isFav = widget.isFavorite;
-  }
-
-  void _toggleFavorite() {
-    setState(() => _isFav = !_isFav);
-    widget.onToggleFavorite();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("${widget.hymn.number}. ${widget.hymn.title}"),
-        actions: [
-          if (!widget.hymn.isCustom)
-            IconButton(
-              icon: Icon(
-                _isFav ? Icons.star : Icons.star_border,
-                color: Colors.amber,
-              ),
-              onPressed: _toggleFavorite,
-            ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'share_txt') {
-                Share.share(_hymnShareText(widget.hymn),
-                    subject: "Chants de Victoire - ${widget.hymn.title}");
-              } else if (value == 'share_pdf') {
-                _exportPdf(context);
-              }
-            },
-            itemBuilder: (_) => [
-              const PopupMenuItem(
-                  value: 'share_txt',
-                  child: ListTile(
-                    leading:
-                        Icon(Icons.text_snippet, color: AppTheme.primaryGreen),
-                    title: Text("Exporter en TXT"),
-                    contentPadding: EdgeInsets.zero,
-                  )),
-              const PopupMenuItem(
-                  value: 'share_pdf',
-                  child: ListTile(
-                    leading: Icon(Icons.picture_as_pdf, color: Colors.red),
-                    title: Text("Exporter en PDF"),
-                    contentPadding: EdgeInsets.zero,
-                  )),
-            ],
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              RepaintBoundary(
-                child: SelectionArea(
-                  child: Text(
-                    widget.hymn.lyrics,
-                    style: TextStyle(fontSize: widget.fontSize, height: 1.6),
-                  ),
-                ),
-              ),
-              if ([
-                widget.hymn.auteur,
-                widget.hymn.annee,
-                widget.hymn.histoire,
-                widget.hymn.compositeur,
-                widget.hymn.traducteur,
-                widget.hymn.source,
-                widget.hymn.referenceBiblique,
-                widget.hymn.themes,
-                widget.hymn.metadataReviewNote,
-              ].any((value) => value != null && value.trim().isNotEmpty))
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: InfoAuteurChant(
-                    titreChant: widget.hymn.title,
-                    auteur: widget.hymn.auteur ?? 'Inconnu',
-                    annee: widget.hymn.annee ?? '',
-                    histoire: widget.hymn.histoire ?? '',
-                    compositeur: widget.hymn.compositeur,
-                    traducteur: widget.hymn.traducteur,
-                    source: widget.hymn.source,
-                    referenceBiblique: widget.hymn.referenceBiblique,
-                    themes: widget.hymn.themes,
-                    metadataReviewNote: widget.hymn.metadataReviewNote,
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppTheme.primaryGreen,
-        child: const Icon(Icons.fullscreen),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => WorshipModeScreen(
-                hymn: widget.hymn,
-                scrollSpeed: widget.scrollSpeed,
-                fontSize: widget.fontSize.clamp(24.0, 40.0),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-    Future<void> _exportPdf(BuildContext context) async {
-    // Show loading spinner so the user knows the PDF is being generated
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
-    );
-
-    try {
-      final file = await PdfGenerator.generateHymnPdf(widget.hymn);
-      if (!context.mounted) return;
-      Navigator.of(context, rootNavigator: true).pop(); // close spinner
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        subject: '${widget.hymn.title} — PDF',
-      );
-    } catch (error) {
-      if (!context.mounted) return;
-      Navigator.of(context, rootNavigator: true).pop(); // close spinner
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Export PDF impossible : $error')),
-      );
-    }
-  }
 }
 
 // ======================== WORSHIP MODE ========================

@@ -39,10 +39,10 @@ Search is more than a title filter. Results are ranked by relevance across sever
 
 Search is **accent-insensitive**: typing `benissons` finds `Grand Dieu, nous te bénissons`, and `oe`/`œ` are folded together. Lyrics are bundled with the app and read from an asset file, not fetched when you open a song.
 
-Opening a hymn takes you to a reader with scrollable lyrics. An expandable **“À propos de”** card shows the supporting details when present: author, year, composer, translator, biblical reference, themes, source, history, and verification note.
+Opening a hymn takes you to a reader with scrollable lyrics. The **À propos** button (info icon) in the reader's app bar opens a draggable bottom sheet with the supporting details when present: author, year, composer, translator, biblical reference, themes, source, history, and verification note. The sheet opens at 65% of the screen height and can be drag-resized between 30% and 95%, so the lyrics are never fully covered.
 
 ### Make the words easier to follow
-The reader uses a dark theme with a configurable lyric font size. Tap its full-screen button to enter **Worship mode**: a black, minimal-distraction view with large centered lyrics. You can start or stop automatic scrolling and change its speed from inside that view. The **Plus** (More) tab also sets a default reading font size (14–40) and scroll speed (5–50); both are saved between sessions.
+The reader uses a dark theme with a configurable lyric font size, and lyrics are selectable and copyable (`SelectionArea`). Tap the floating full-screen button to enter **Worship mode**: a black, minimal-distraction view with large centered lyrics. You can start or stop automatic scrolling and change its speed from inside that view. The **Plus** (More) tab also sets a default reading font size (14–40) and scroll speed (5–50); both are saved between sessions.
 
 ### Keep and create songs
 - **Favorites (Favoris):** Star any hymn from the list or its reader to add it to the **Favoris** tab; unstar to remove it. The list is saved on the device. A PDF export of the whole favorites list is available from the Favorites screen.
@@ -111,14 +111,15 @@ Two checks that are easy to miss when adding content: the file must be a **list 
 
 ## How the project is put together
 
-This is a Flutter application targeting Android and iOS. The app logic is currently in a single file, `lib/main.dart` (~3,500 lines).
+This is a Flutter application targeting Android and iOS. The app logic is currently in a single file, `lib/main.dart` (~3,600 lines).
 
 1. **Model (`Hymn`):** A single class for built-in and custom songs. `toJson()`/`fromJson()` round-trip the optional metadata through the same schema used by the asset file, so custom songs are stored in exactly the same shape.
 2. **Data loading:** `allHymns` holds the in-memory catalogue, with a `_HymnSearchIndex` map built once after load. Search indexes are pre-folded (lowercase + accent-stripped) strings, so each keystroke only folds the query.
 3. **Navigation and screens:** A splash screen loads the catalogue and preferences, then shows five tabs — **Chants, Favoris, Écrire, Apprendre, Plus**. Readers, worship mode, the developer page, and the sources page push on top of those tabs. The UI uses a dark palette with green (`#1B5E20`) and gold accents.
-4. **Local preferences:** `shared_preferences` stores favorite numbers (`favorites`, a string list), custom songs (`customSongs`, JSON-encoded), font size (`fontSize`), scroll speed (`scrollSpeed`), and the write-tab draft (`chantWriterDraftV2`).
-5. **Export:** `pdf` builds A4 documents, `path_provider` supplies the documents directory for the generated file, and `share_plus` opens the native share sheet.
-6. **External content:** `webview_flutter` displays the Learn page; `url_launcher` opens links, the map, and the dialer; `font_awesome_flutter` supplies the social icons on the developer page.
+4. **Reader (`HymnReaderScreen`):** The screen opened for any hymn or saved song. It keeps the favorite state locally, surfaces the hymn's metadata on demand through the **À propos** bottom sheet (`InfoAuteurChant`), and hands the hymn to `WorshipModeScreen` for full-screen reading. Its app bar menu offers export as TXT (system share sheet) or PDF (`PdfGenerator`), and custom songs show no favorite star.
+5. **Local preferences:** `shared_preferences` stores favorite numbers (`favorites`, a string list), custom songs (`customSongs`, JSON-encoded), font size (`fontSize`), scroll speed (`scrollSpeed`), and the write-tab draft (`chantWriterDraftV2`).
+6. **Export:** `pdf` builds A4 documents, `path_provider` supplies the documents directory for the generated file, and `share_plus` opens the native share sheet.
+7. **External content:** `webview_flutter` displays the Learn page; `url_launcher` opens links, the map, and the dialer; `font_awesome_flutter` supplies the social icons on the developer page.
 
 ---
 
@@ -239,7 +240,8 @@ These are visible in the code today and worth fixing before a public release:
 - **No automated tests.** `test/` is empty, and `ios/RunnerTests/RunnerTests.swift` contains only the template test, which asserts nothing.
 - **The asset does not include application launcher icons.** `flutter_launcher_icons` in `pubspec.yaml` points at `assets/icon/icon.png`, and that file is missing. Create `assets/icon/icon.png` and run `dart run flutter_launcher_icons` if you want generated icons; otherwise the existing default Flutter icons are used.
 - **Encoding check needed on the hymn file.** Raw inspection of `assets/data/chants_de_victoire_hymns.json` (read with UTF-8) showed sequences such as `Ã©` and `â€™`. This usually means the file is Windows-1252 encoded while the app decodes it as UTF-8, which would render accents as mojibake (`bÃ©nissons` instead of `bénissons`). `flutter analyze` cannot detect this. Verify by opening the asset as UTF-8, or by reading hymn 1 on a device; if it is affected, re-save the file as UTF-8.
-- **All app logic is in `lib/main.dart`.** Splitting it into `models/`, `screens/`, `services/`, and `widgets/` would make the project much easier to maintain.
+- **All app logic is in `lib/main.dart`.** It is 3,751 lines, but the file is longer than its content: whole class blocks (`Hymn`, `HymnReaderScreen`/`_HymnReaderScreenState`) appear twice, and the second copy shadows the first. A duplicate `HymnReaderScreen` makes the project **fail to compile** with `duplicate_definition`; it was removed so `flutter analyze` reports no issues, but the remaining duplicate `Hymn` block and commented-out screens should be cleaned up. Splitting the file into `models/`, `screens/`, `services/`, and `widgets/` would make the project much easier to maintain.
+- **UI changes in the reader must be kept in one place.** Because `main.dart` has (and has had) duplicated reader code, edit the definition near the top of the file — the `// ======================== READER ========================` section — and verify with `flutter analyze --no-pub` that no duplicate class came back.
 
 ---
 
